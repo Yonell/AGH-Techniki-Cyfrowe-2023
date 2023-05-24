@@ -28,49 +28,35 @@ module led (
 	localparam granica_00 = oblicz_granice(0);
 	
 	initial begin
-		$display("granica_00 = %0d, granica_01 = %0d, granica_10 = %0d", granica_00, granica_01, granica_10);
+		$display("granica_00 = %0d, granica_01 = %0d, granica_10 = %0d", 
+			granica_00, 
+			granica_01, 
+			granica_10
+		);
 	end
  
-	// Liczniki cykli zegara
+	// Licznik cykli zegara
 	reg [rozmiar_licznika-1:0] counter = 0;
 	
 	// Sygnały PWM
 	localparam led_11 = 1'b1; // 100% - Zawsze 1
-	reg led_10 = 1'b0;
-	reg led_01 = 1'b0;
-	reg led_00 = 1'b0;
+	wire led_10;
+	wire led_01;
+	wire led_00;
 	
 	always @ (posedge in_clk)
 		counter <= counter + 1;
   
 	// PWM 46% 
-	always @ (posedge in_clk)
-	begin
-		if(counter >= granica_10)
-			led_10 <= 1'b0;
-		else 
-			led_10 <= 1'b1;
-	end
+	assign led_10 = (counter < granica_10) ? 1'b1 : 1'b0;
    
 	// PWM - 22%
-	always @ (posedge in_clk)
-	begin
-		if(counter >= granica_01)
-			led_01 <= 1'b0;
-		else
-			led_01 <= 1'b1;
-	end
+	assign led_01 = (counter < granica_01) ? 1'b1 : 1'b0;
    
 	// PWM - 10%
-	always @ (posedge in_clk)
-	begin
-		if(counter >= granica_00)
-			led_00 <= 1'b0;
-		else
-			led_00 <= 1'b1;
-	end
+	assign led_00 = (counter < granica_00) ? 1'b1 : 1'b0;
   
 	// Multiplexer wybiera synał PWM według stau inprzycisk1 i in_przycisk2
-	assign out_led = in_przycisk1 ? 	(in_przycisk2 ? led_11 : led_10) : 
-												(in_przycisk2 ? led_01 : led_00);
+	assign out_led = in_przycisk1 ? (in_przycisk2 ? led_11 : led_10) : 
+									(in_przycisk2 ? led_01 : led_00);
 endmodule
